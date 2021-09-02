@@ -14,7 +14,7 @@ from termcolor import colored
 
 def banner():
 
-    custom_fig = pyfiglet.Figlet(font='banner')
+    custom_fig = pyfiglet.Figlet(font='doom')
 
     print(colored(custom_fig.renderText('Change my MAC!')))
 
