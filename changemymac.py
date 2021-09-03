@@ -26,31 +26,31 @@ def banner():
 
 def get_input():
 
-    sample = "sudo python3 changemymac.py -i [interface] -[option] [argument]"
+    sample = "[sudo] python3 changemymac.py -[i] [interface] -[option] [argument]"
 
     parse_object = optparse.OptionParser(usage=sample)
 
     parse_object.add_option("-i","--interface",dest = "interface", help="The interface that is going to be changed its MAC address.")
 
-    parse_object.add_option("-m","--mac", dest="mac", help="New MAC address")
+    parse_object.add_option("-m","--mac", dest="mac", help="Assign a new MAC address manually.")
     
-    parse_object.add_option("-c","--current",dest="current",help="Print the current MAC address",nargs=0)
+    parse_object.add_option("-c","--current",dest="current",help="Show the current MAC address",nargs=0)
     
-    parse_object.add_option("-r","--random",dest="random",help="Set fully random MAC",nargs=0)
+    parse_object.add_option("-r","--random",dest="random",help="Set a random MAC address from scracth.",nargs=0)
     
-    parse_object.add_option("-V","--version",dest="version",help="Print version",nargs=0)
+    parse_object.add_option("-V","--version",dest="version",help="Show current version of the script.",nargs=0)
    
-    parse_object.add_option("-s","--samevendor",dest="same",help="Assign a random MAC address from your original MAC same vendor",nargs=0)
+    parse_object.add_option("-s","--samevendor",dest="same",help="Assign a random MAC address crafted with the same vendor as your original MAC vendor.",nargs=0)
     
-    parse_object.add_option("-o","--original",dest="original",help="Replaces the current MAC address with the MAC address assigned by the vendor",nargs=0)
+    parse_object.add_option("-o","--original",dest="original",help="Reset your MAC address to your original MAC.",nargs=0)
     
-    parse_object.add_option("-l","--like",dest="like",help="Set random vendor MAC of the same kind",nargs=0)
+    parse_object.add_option("-l","--like",dest="like",help="Set a random MAC address of the same kind as your current vendor.",nargs=0)
     
-    parse_object.add_option("-a","--another",dest="another",help="Set random vendor MAC of the any kind",nargs=0)
+    parse_object.add_option("-a","--another",dest="another",help="Set a random MAC address with any of the vendors.",nargs=0)
     
-    parse_object.add_option("-v", "--vendor", dest="vendor", help="Assign a random MAC address for the vendor you want [XX:XX:XX]",nargs=1)
+    parse_object.add_option("-v", "--vendor", dest="vendor", help="Assign a vendor MAC address in format XX:XX:XX.",nargs=1)
     
-    parse_object.add_option("-L", "--list", dest="list", help="Print known vendors",nargs=0)
+    parse_object.add_option("-L", "--list", dest="list", help="Show list of the known vendors.",nargs=0)
     
     (user_input,arguments) = parse_object.parse_args()
     
@@ -72,27 +72,25 @@ def mac_changer(interface, mac, original_mac, user_input):
 
     if str(current_mac).upper() != str(new_mac).upper() or get_input == ():
 
-        original_vendor = vendor("/home/dkp/Masaüstü/projects/oui.txt",original_mac[0:8].upper())
+        original_vendor = vendor("vendors.txt",original_mac[0:8].upper())
         
-        current_vendor = vendor("/home/dkp/Masaüstü/projects/oui.txt",current_mac[0:8].upper())
+        current_vendor = vendor("vendors.txt",current_mac[0:8].upper())
 
-        new_vendor = vendor("/home/dkp/Masaüstü/projects/oui.txt",new_mac[0:8].upper())
+        new_vendor = vendor("vendors.txt",new_mac[0:8].upper())
 
         vendors = [original_vendor, current_vendor, new_vendor]
 
-        for i in vendors:
+        for i in range(len(vendors)):
 
-            if i == "":
+            if vendors[i] == "":
                 
-                i = "Unknown\n"
+                vendors[i]= "Unknown\n"
 
-        print(f"Your MAC Address was changed from {current_mac} to {new_mac}")
+        print(f"\nYOUR ORIGINAL MAC : {original_mac} {original_vendor}")
 
-        print(f"\nORIGINAL MAC : {original_mac} {original_vendor}")
-
-        print(f"CURRENT MAC: {current_mac} {current_vendor}")
+        print(f"YOUR CURRENT MAC: {current_mac} {current_vendor}")
         
-        print("NEW MAC      : " + new_mac + "    " + new_vendor)
+        print(f"YOUR NEW MAC: {new_mac} {new_vendor}")
     
     else:
         
@@ -112,27 +110,27 @@ def check_new_mac(interface):
 
         return None
 
-def oui_list(file):
+def vendors_list(file):
     
-    oui_list = []
+    vendors_list = []
     
-    with open(file,'r') as ouifile:
+    with open(file,'r') as vendorsfile:
 
-        lines = ouifile.readlines()
+        lines = vendorsfile.readlines()
 
         for line in lines:
 
-            oui_list.append(line)
+            vendors_list.append(line)
 
-    return oui_list
+    return vendors_list
 
 def wireless_list(file):
     
     wireless_list = []
     
-    with open(file,'r') as ouifile:
+    with open(file,'r') as wirelessfile:
 
-        lines = ouifile.readlines()
+        lines = wirelessfile.readlines()
 
         for line in lines:
 
@@ -176,13 +174,13 @@ def another_vendor_mac(user_interface,original_mac,file_name,user_input):
     
     vendor = original_mac[0:8]
     
-    oui = oui_list(file_name)
+    vendors = vendors_list(file_name)
     
     mac = random_mac(3)
     
     index = 0
 
-    for i in oui:
+    for i in vendors:
         
         if i.find(vendor) == -1:
             
@@ -190,11 +188,11 @@ def another_vendor_mac(user_interface,original_mac,file_name,user_input):
         
         else:
             
-            oui.pop(index)
+            vendors.pop(index)
             
             break
     
-    new_mac = oui[random.randint(0,len(oui)-1)][0:8] + ":" + mac
+    new_mac = vendors[random.randint(0,len(vendors)-1)][0:8] + ":" + mac
     
     mac_changer(user_interface,new_mac,original_mac,user_input)
 
@@ -280,7 +278,7 @@ def main():
                         
                 else:
                         
-                    print('[-] MAC Address you entered is not valid.')
+                    print('[-] MAC Address you entered is not valid.\nPlease try to enter a MAC address in XX:XX:XX:XX:XX:XX format.')
 
             elif user_input.random == () and user_input.original == None and user_input.like == None and user_input.another == None and user_input.same == None and user_input.mac == None and user_input.vendor == None:
 
@@ -302,7 +300,7 @@ def main():
 
             elif user_input.another == () and user_input.original == None and user_input.like == None and user_input.same == None and user_input.random == None and user_input.mac == None and user_input.vendor == None:
 
-                another_vendor_mac(user_input.interface, original_mac, "/home/dkp/Masaüstü/projects/oui.txt", user_input.original)
+                another_vendor_mac(user_input.interface, original_mac, "/home/dkp/Masaüstü/projects/vendors.txt", user_input.original)
                 
             elif user_input.vendor and user_input.original == None and user_input.like == None and user_input.another == None and user_input.random == None and user_input.mac == None and user_input.same == None:
 
@@ -310,12 +308,16 @@ def main():
             
             else:
 
-                print("[!] Please select only one of the parameters after you specify the interface. For options try -h parameter.")
+                print("[!] Please select only one of the parameters after you specify the interface. To list the options, run the script with -h or --help.")
 
         except FileNotFoundError:
 
-            print("[!] You are missing one of your files.")
+            print("[!] Could not run the program. This could be due to the following reasons:\n1. Some of the required files in the repository might be missing.\n2. Some commands might ask for sudo privileges to run.\n3. ethtool might not be downloaded on your device.")
         
+        except subprocess.CalledProcessError:
+            
+            print("[!] Please enter a valid interface name.")
+
         except:
 
             print("[!] Please install ethtool to Change your MAC.")
@@ -328,7 +330,7 @@ def main():
 
     elif user_input.list == ():
    
-        list_vendors("oui.txt")
+        list_vendors("vendors.txt")
 
     else:
    
