@@ -300,7 +300,7 @@ def main():
 
             elif user_input.another == () and user_input.original == None and user_input.like == None and user_input.same == None and user_input.random == None and user_input.mac == None and user_input.vendor == None:
 
-                another_vendor_mac(user_input.interface, original_mac, "/home/dkp/Masaüstü/projects/vendors.txt", user_input.original)
+                another_vendor_mac(user_input.interface, original_mac, "vendors.txt", user_input.original)
                 
             elif user_input.vendor and user_input.original == None and user_input.like == None and user_input.another == None and user_input.random == None and user_input.mac == None and user_input.same == None:
 
